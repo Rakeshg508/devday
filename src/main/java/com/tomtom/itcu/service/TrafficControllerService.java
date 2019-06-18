@@ -3,6 +3,7 @@ package com.tomtom.itcu.service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,35 +22,56 @@ import com.tomtom.itcu.tomtom.api.TomtomService;
 public class TrafficControllerService {
 
     @Autowired
+    public TemporaryTrafficRepository tempTrafficRepository;
+    @Autowired
     public TrafficInfoRepository trafficInfoRepository;
     @Autowired
     public ResponseConstructor responseConstructor;
 
     @Autowired
-    public TemporaryTrafficRepository tempTrafficRepository;
-    @Autowired
     @Qualifier("tomtomServiceImpl")
     public TomtomService tomtomServiceImpl;
 
-    public List<TrafficResponse> getDefaultTrafficInfo(String signalId) {
+    public List<TrafficResponse> getDefaultTrafficInfo(final String signalId) {
         final MasterTrafficInfo masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
         final String defaultTime = masterTrafficInfo.getDefaultTime();
         final Double lat = masterTrafficInfo.getLat();
         final Double lon = masterTrafficInfo.getLon();
+        int calculatedSignalTime = 0;
+        // check if temporary override time is set.
+        final int temporaryOverrideTime = isTemporaryOverride(signalId);
 
         final FlowSegmentData flowSegmentData = getFlowSegmentData(lat, lon);
-        final int calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData);
-
+        calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData) + temporaryOverrideTime;
         updateTrafficHistory(masterTrafficInfo, calculatedSignalTime);
 
         return responseConstructor.getSignalResponse(signalId, calculatedSignalTime, defaultTime);
     }
 
-    private void updateTrafficHistory(MasterTrafficInfo masterTrafficInfo, int calculatedSignalTime) {
+    private int isTemporaryOverride(final String signalId) {
+        int tempTime = 0;
+        final Optional<TemporarryTrafficDetails> temporaryDetails = tempTrafficRepository.findById(signalId);
+        if (temporaryDetails.isPresent()) {
+            final Date now = new Date();
+            final TemporarryTrafficDetails temporarryTrafficDetails = temporaryDetails.get();
+            final int duration = temporarryTrafficDetails.getDuration();
+            final Date creationTime = temporarryTrafficDetails.getCreationTime();
+            final long timeDifference = now.getTime() - creationTime.getTime();
+            final long minutes = TimeUnit.MILLISECONDS.toMinutes(timeDifference);
+            if (minutes <= duration) {
+                // set temp
+                tempTime = temporarryTrafficDetails.getTemporaryTime();
+            }
+
+        }
+        return tempTime;
+    }
+
+    private void updateTrafficHistory(final MasterTrafficInfo masterTrafficInfo, final int calculatedSignalTime) {
         // todo update history table
     }
 
-    private int getCalculatedSignalTime(String idDefaultTime, FlowSegmentData flowSegmentData) {
+    private int getCalculatedSignalTime(final String idDefaultTime, final FlowSegmentData flowSegmentData) {
         final int currentSpeed = flowSegmentData.getCurrentSpeed();
         final int freeFlowSpeed = flowSegmentData.getFreeFlowSpeed();
         final int defaultTime = Integer.parseInt(idDefaultTime);
@@ -57,7 +79,13 @@ public class TrafficControllerService {
         if (currentSpeed == freeFlowSpeed) {
             deviateTime = defaultTime;
         } else {
-            final int diffPercentage = (freeFlowSpeed - currentSpeed) * 100 / freeFlowSpeed;
+            int diffPercentage = (freeFlowSpeed - currentSpeed) * 100 / freeFlowSpeed;
+            if (diffPercentage > 50) {
+                diffPercentage = 50;
+            }
+            else if (diffPercentage < -50) {
+                diffPercentage = -50;
+            }
             deviateTime = defaultTime + defaultTime * diffPercentage / 100;
         }
 
@@ -65,12 +93,12 @@ public class TrafficControllerService {
 
     }
 
-    private FlowSegmentData getFlowSegmentData(double lat, double lon) {
+    private FlowSegmentData getFlowSegmentData(final double lat, final double lon) {
         // call tomtom api
         return tomtomServiceImpl.getSpeedInfo(lat, lon);
     }
 
-    public TrafficResponse getSignalInfo(String signalId) {
+    public TrafficResponse getSignalInfo(final String signalId) {
         final List<MasterTrafficInfo> trafficInfo = trafficInfoRepository.findBySignalId(signalId);
         // responseConstructor.constructResponse(trafficInfo);
         final TrafficResponse trafficResponse = new TrafficResponse();
@@ -82,7 +110,7 @@ public class TrafficControllerService {
         return trafficResponse;
     }
 
-    public void setTemporaryTime(String signalId, int changedSignalTime, int durationInMinute) {
+    public void setTemporaryTime(final String signalId, final int changedSignalTime, final int durationInMinute) {
 
         final Optional<TemporarryTrafficDetails> tempTrafficDetails = tempTrafficRepository.findById(signalId);
         if (tempTrafficDetails.isPresent()) {
