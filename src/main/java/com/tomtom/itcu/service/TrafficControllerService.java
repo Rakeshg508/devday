@@ -62,10 +62,16 @@ public class TrafficControllerService {
         return tomtomServiceImpl.getSpeedInfo(lat, lon);
     }
 
-    public void getSignalInfo(String signalId) {
+    public TrafficResponse getSignalInfo(String signalId) {
         final List<MasterTrafficInfo> trafficInfo = trafficInfoRepository.findBySignalId(signalId);
         // responseConstructor.constructResponse(trafficInfo);
-
+        final TrafficResponse trafficResponse = new TrafficResponse();
+        trafficResponse.setSignalId("u123");
+        trafficResponse.setDefaultTime("30");
+        trafficResponse.setCurrentTime("60");
+        trafficResponse.setLat(40.757285);
+        trafficResponse.setLon(-73.989927);
+        return trafficResponse;
     }
 
 }

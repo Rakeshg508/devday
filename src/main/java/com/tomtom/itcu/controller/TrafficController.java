@@ -24,9 +24,8 @@ public class TrafficController {
 
     @RequestMapping(value = "/signal/info", method = RequestMethod.POST)
     @JsonProperty
-    public String getSignalInfo(String signalId) {
-        // trafficControllerService.getSignalInfo(signalId);
-        return "traffic";
+    public TrafficResponse getSignalInfo(String signalId) {
+        return trafficControllerService.getSignalInfo(signalId);
     }
 
     @RequestMapping(value = "/change/signal", method = RequestMethod.POST)
