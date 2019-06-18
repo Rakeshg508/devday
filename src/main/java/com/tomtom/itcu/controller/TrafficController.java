@@ -16,21 +16,23 @@ public class TrafficController {
     @Autowired
     public TrafficControllerService trafficControllerService;
 
-    @RequestMapping(value = "/traffic", method = RequestMethod.GET)
+    @RequestMapping(value = "/traffic/info", method = RequestMethod.GET)
     @JsonProperty
-    public TrafficResponse getTrafficInfo(String defaultTime, String signalId, double lat, double lon) {
-        return trafficControllerService.getDefaultTrafficInfo(signalId, defaultTime, lat, lon).get(0);
+    public TrafficResponse getTrafficInfo(String signalId) {
+        return trafficControllerService.getDefaultTrafficInfo(signalId).get(0);
     }
 
-    @RequestMapping(value = "/signal/info", method = RequestMethod.POST)
+    @RequestMapping(value = "/signal/info", method = RequestMethod.GET)
     @JsonProperty
     public TrafficResponse getSignalInfo(String signalId) {
         return trafficControllerService.getSignalInfo(signalId);
     }
 
-    @RequestMapping(value = "/change/signal", method = RequestMethod.POST)
+    @RequestMapping(value = "/change/signal", method = RequestMethod.GET)
     @JsonProperty
-    public void setTemporaryTrafficTime() {
+    public void setTemporaryTrafficTime(String signalId, String changedSignalTime, String durationInMinute) {
+        // input: changed value, duration, signal id
+
         System.out.println("traffic temporary  called");
     }
 

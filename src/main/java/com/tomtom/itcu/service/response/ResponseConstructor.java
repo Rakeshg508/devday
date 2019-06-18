@@ -10,11 +10,12 @@ import com.tomtom.itcu.model.MasterTrafficInfo;
 @Component
 public class ResponseConstructor {
 
-    public List<TrafficResponse> getSignalResponse(String signalId, int calculatedSignalTime) {
-        final List<TrafficResponse> reponses = new ArrayList();
+    public List<TrafficResponse> getSignalResponse(String signalId, int calculatedSignalTime, String defaultTime) {
+        final List<TrafficResponse> reponses = new ArrayList<TrafficResponse>();
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId(signalId);
         trafficResponse.setCurrentTime(String.valueOf(calculatedSignalTime));
+        trafficResponse.setDefaultTime(defaultTime);
         reponses.add(trafficResponse);
         return reponses;
     }

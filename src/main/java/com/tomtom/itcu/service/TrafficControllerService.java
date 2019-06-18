@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.tomtom.itcu.constant.TrafficConstatnts;
 import com.tomtom.itcu.model.FlowSegmentData;
 import com.tomtom.itcu.model.MasterTrafficInfo;
 import com.tomtom.itcu.repository.TrafficInfoRepository;
@@ -26,19 +25,15 @@ public class TrafficControllerService {
     @Qualifier("tomtomServiceImpl")
     public TomtomService tomtomServiceImpl;
 
-    public List<TrafficResponse> getDefaultTrafficInfo(String signalId, String defaultTime, double lat, double lon) {
-        String idDefaultTime = "-1";
-        if (defaultTime.equals(TrafficConstatnts.INSTALLATION_TIME)) {
-            final List<MasterTrafficInfo> masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId);
-            idDefaultTime = masterTrafficInfo.get(0).getDefaultTime();
+    public List<TrafficResponse> getDefaultTrafficInfo(String signalId) {
+        final List<MasterTrafficInfo> masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId);
+        final String defaultTime = masterTrafficInfo.get(0).getDefaultTime();
+        final Double lat = masterTrafficInfo.get(0).getLat();
+        final Double lon = masterTrafficInfo.get(0).getLon();
 
-        } else {
-            idDefaultTime = defaultTime;
-        }
         final FlowSegmentData flowSegmentData = getFlowSegmentData(lat, lon);
-        final int calculatedSignalTime = getCalculatedSignalTime(idDefaultTime, flowSegmentData);
-
-        return responseConstructor.getSignalResponse(signalId, calculatedSignalTime);
+        final int calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData);
+        return responseConstructor.getSignalResponse(signalId, calculatedSignalTime, defaultTime);
     }
 
     private int getCalculatedSignalTime(String idDefaultTime, FlowSegmentData flowSegmentData) {
@@ -71,6 +66,7 @@ public class TrafficControllerService {
         trafficResponse.setCurrentTime("60");
         trafficResponse.setLat(40.757285);
         trafficResponse.setLon(-73.989927);
+        // trafficResponse.setChangedTime(getChangedTime(signalId, ));
         return trafficResponse;
     }
 
