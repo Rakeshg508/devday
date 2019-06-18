@@ -30,9 +30,9 @@ public class TrafficController {
 
     @RequestMapping(value = "/change/signal", method = RequestMethod.GET)
     @JsonProperty
-    public void setTemporaryTrafficTime(String signalId, String changedSignalTime, String durationInMinute) {
+    public void setTemporaryTrafficTime(String signalId, int changedSignalTime, int durationInMinute) {
         // input: changed value, duration, signal id
-
+        trafficControllerService.setTemporaryTime(signalId, changedSignalTime, durationInMinute);
         System.out.println("traffic temporary  called");
     }
 

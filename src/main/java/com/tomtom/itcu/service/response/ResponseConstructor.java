@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.tomtom.itcu.model.MasterTrafficInfo;
+import com.tomtom.itcu.entity.MasterTrafficInfo;
 
 @Component
 public class ResponseConstructor {

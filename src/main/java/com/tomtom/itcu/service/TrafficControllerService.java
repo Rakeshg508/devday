@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.tomtom.itcu.entity.MasterTrafficInfo;
 import com.tomtom.itcu.model.FlowSegmentData;
-import com.tomtom.itcu.model.MasterTrafficInfo;
 import com.tomtom.itcu.repository.TrafficInfoRepository;
 import com.tomtom.itcu.service.response.ResponseConstructor;
 import com.tomtom.itcu.service.response.TrafficResponse;
@@ -26,14 +26,21 @@ public class TrafficControllerService {
     public TomtomService tomtomServiceImpl;
 
     public List<TrafficResponse> getDefaultTrafficInfo(String signalId) {
-        final List<MasterTrafficInfo> masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId);
-        final String defaultTime = masterTrafficInfo.get(0).getDefaultTime();
-        final Double lat = masterTrafficInfo.get(0).getLat();
-        final Double lon = masterTrafficInfo.get(0).getLon();
+        final MasterTrafficInfo masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
+        final String defaultTime = masterTrafficInfo.getDefaultTime();
+        final Double lat = masterTrafficInfo.getLat();
+        final Double lon = masterTrafficInfo.getLon();
 
         final FlowSegmentData flowSegmentData = getFlowSegmentData(lat, lon);
         final int calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData);
+
+        updateTrafficHistory(masterTrafficInfo, calculatedSignalTime);
+
         return responseConstructor.getSignalResponse(signalId, calculatedSignalTime, defaultTime);
+    }
+
+    private void updateTrafficHistory(MasterTrafficInfo masterTrafficInfo, int calculatedSignalTime) {
+        // todo update history table
     }
 
     private int getCalculatedSignalTime(String idDefaultTime, FlowSegmentData flowSegmentData) {
@@ -66,8 +73,11 @@ public class TrafficControllerService {
         trafficResponse.setCurrentTime("60");
         trafficResponse.setLat(40.757285);
         trafficResponse.setLon(-73.989927);
-        // trafficResponse.setChangedTime(getChangedTime(signalId, ));
         return trafficResponse;
+    }
+
+    public void setTemporaryTime(String signalId, int changedSignalTime, int durationInMinute) {
+
     }
 
 }

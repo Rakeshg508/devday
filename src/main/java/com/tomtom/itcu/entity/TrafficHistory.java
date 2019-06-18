@@ -1,26 +1,23 @@
-package com.tomtom.itcu.model;
+package com.tomtom.itcu.entity;
+
+import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
-public class MasterTrafficInfo {
+public class TrafficHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String signalId;
     private String defaultTime;
+    private String currentTime;
     private Double lat;
     private Double lon;
-
-    public MasterTrafficInfo() {
-    }
-
-    public MasterTrafficInfo(String defaultTime) {
-        this.defaultTime = defaultTime;
-    }
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationTime;
 
     public String getSignalId() {
         return signalId;
@@ -36,6 +33,14 @@ public class MasterTrafficInfo {
 
     public void setDefaultTime(String defaultTime) {
         this.defaultTime = defaultTime;
+    }
+
+    public String getCurrentTime() {
+        return currentTime;
+    }
+
+    public void setCurrentTime(String currentTime) {
+        this.currentTime = currentTime;
     }
 
     public Double getLat() {
@@ -54,9 +59,12 @@ public class MasterTrafficInfo {
         this.lon = lon;
     }
 
-    @Override
-    public String toString() {
-        return "MasterTrafficInfo{" + "signalId=" + signalId + ", defaultTime='" + defaultTime + '\'' + '}';
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 
 }

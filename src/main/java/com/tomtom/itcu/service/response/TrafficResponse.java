@@ -1,5 +1,9 @@
 package com.tomtom.itcu.service.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class TrafficResponse {
 
     private String signalId;
