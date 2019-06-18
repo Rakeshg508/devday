@@ -28,7 +28,7 @@ public class TrafficController {
         return trafficControllerService.getSignalInfo(signalId);
     }
 
-    @RequestMapping(value = "/change/signal", method = RequestMethod.GET)
+    @RequestMapping(value = "/signal/change", method = RequestMethod.GET)
     @JsonProperty
     public void setTemporaryTrafficTime(String signalId, int changedSignalTime, int durationInMinute) {
         // input: changed value, duration, signal id

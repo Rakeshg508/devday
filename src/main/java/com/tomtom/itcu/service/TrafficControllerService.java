@@ -1,13 +1,17 @@
 package com.tomtom.itcu.service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.tomtom.itcu.entity.MasterTrafficInfo;
+import com.tomtom.itcu.entity.TemporarryTrafficDetails;
 import com.tomtom.itcu.model.FlowSegmentData;
+import com.tomtom.itcu.repository.TemporaryTrafficRepository;
 import com.tomtom.itcu.repository.TrafficInfoRepository;
 import com.tomtom.itcu.service.response.ResponseConstructor;
 import com.tomtom.itcu.service.response.TrafficResponse;
@@ -21,6 +25,8 @@ public class TrafficControllerService {
     @Autowired
     public ResponseConstructor responseConstructor;
 
+    @Autowired
+    public TemporaryTrafficRepository tempTrafficRepository;
     @Autowired
     @Qualifier("tomtomServiceImpl")
     public TomtomService tomtomServiceImpl;
@@ -77,6 +83,22 @@ public class TrafficControllerService {
     }
 
     public void setTemporaryTime(String signalId, int changedSignalTime, int durationInMinute) {
+
+        final Optional<TemporarryTrafficDetails> tempTrafficDetails = tempTrafficRepository.findById(signalId);
+        if (tempTrafficDetails.isPresent()) {
+            final TemporarryTrafficDetails temporarryTrafficDetails = tempTrafficDetails.get();
+            temporarryTrafficDetails.setDuration(durationInMinute);
+            temporarryTrafficDetails.setSignalId(signalId);
+            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
+            temporarryTrafficDetails.setCreationTime(new Date());
+        } else {
+            final TemporarryTrafficDetails temporarryTrafficDetails = new TemporarryTrafficDetails();
+            temporarryTrafficDetails.setDuration(durationInMinute);
+            temporarryTrafficDetails.setSignalId(signalId);
+            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
+            temporarryTrafficDetails.setCreationTime(new Date());
+            tempTrafficRepository.save(temporarryTrafficDetails);
+        }
 
     }
 

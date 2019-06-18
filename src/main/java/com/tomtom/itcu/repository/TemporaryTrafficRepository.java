@@ -1,6 +1,6 @@
 package com.tomtom.itcu.repository;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -8,5 +8,9 @@ import com.tomtom.itcu.entity.TemporarryTrafficDetails;
 
 public interface TemporaryTrafficRepository extends CrudRepository<TemporarryTrafficDetails, String> {
 
-    List<TemporarryTrafficDetails> getTemporaryDetails(String signalId);
+    @Override
+    Optional<TemporarryTrafficDetails> findById(String id);
+
+    @Override
+    TemporarryTrafficDetails save(TemporarryTrafficDetails tempTrafficDetails);
 }
