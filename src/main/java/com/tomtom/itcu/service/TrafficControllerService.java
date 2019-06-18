@@ -82,8 +82,7 @@ public class TrafficControllerService {
             int diffPercentage = (freeFlowSpeed - currentSpeed) * 100 / freeFlowSpeed;
             if (diffPercentage > 50) {
                 diffPercentage = 50;
-            }
-            else if (diffPercentage < -50) {
+            } else if (diffPercentage < -50) {
                 diffPercentage = -50;
             }
             deviateTime = defaultTime + defaultTime * diffPercentage / 100;
@@ -103,8 +102,8 @@ public class TrafficControllerService {
         // responseConstructor.constructResponse(trafficInfo);
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId("u123");
-        trafficResponse.setDefaultTime("30");
-        trafficResponse.setCurrentTime("60");
+        trafficResponse.setDefaultTime(30);
+        trafficResponse.setCurrentTime(60);
         trafficResponse.setLat(40.757285);
         trafficResponse.setLon(-73.989927);
         return trafficResponse;

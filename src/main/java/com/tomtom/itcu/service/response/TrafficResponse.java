@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class TrafficResponse {
 
     private String signalId;
-    private String currentTime;
-    private String defaultTime;
-    private String changedTime;
+    private Integer currentTime;
+    private Integer defaultTime;
+    private Integer changedTime;
     private Double lat;
     private Double lon;
 
@@ -21,27 +21,27 @@ public class TrafficResponse {
         this.signalId = signalId;
     }
 
-    public String getCurrentTime() {
+    public Integer getCurrentTime() {
         return currentTime;
     }
 
-    public void setCurrentTime(String currentTime) {
+    public void setCurrentTime(Integer currentTime) {
         this.currentTime = currentTime;
     }
 
-    public String getDefaultTime() {
+    public Integer getDefaultTime() {
         return defaultTime;
     }
 
-    public void setDefaultTime(String defaultTime) {
+    public void setDefaultTime(Integer defaultTime) {
         this.defaultTime = defaultTime;
     }
 
-    public String getChangedTime() {
+    public Integer getChangedTime() {
         return changedTime;
     }
 
-    public void setChangedTime(String changedTime) {
+    public void setChangedTime(Integer changedTime) {
         this.changedTime = changedTime;
     }
 

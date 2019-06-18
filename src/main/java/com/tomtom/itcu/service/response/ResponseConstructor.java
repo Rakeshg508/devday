@@ -14,8 +14,8 @@ public class ResponseConstructor {
         final List<TrafficResponse> reponses = new ArrayList<TrafficResponse>();
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId(signalId);
-        trafficResponse.setCurrentTime(String.valueOf(calculatedSignalTime));
-        trafficResponse.setDefaultTime(defaultTime);
+        trafficResponse.setCurrentTime(calculatedSignalTime);
+        trafficResponse.setDefaultTime(Integer.parseInt(defaultTime));
         reponses.add(trafficResponse);
         return reponses;
     }
