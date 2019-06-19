@@ -153,6 +153,7 @@ public class TrafficControllerService {
             temporarryTrafficDetails.setSignalId(signalId);
             temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
             temporarryTrafficDetails.setCreationTime(new Date());
+            tempTrafficRepository.save(temporarryTrafficDetails);
         } else {
             final TemporarryTrafficDetails temporarryTrafficDetails = new TemporarryTrafficDetails();
             temporarryTrafficDetails.setDuration(durationInMinute);
