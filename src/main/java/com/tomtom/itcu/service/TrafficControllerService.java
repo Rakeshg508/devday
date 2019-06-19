@@ -9,10 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.tomtom.itcu.constant.TrafficConstatnts;
+import com.tomtom.itcu.entity.CurrentSignalStatus;
 import com.tomtom.itcu.entity.MasterTrafficInfo;
 import com.tomtom.itcu.entity.TemporarryTrafficDetails;
+import com.tomtom.itcu.entity.TrafficHistory;
 import com.tomtom.itcu.model.FlowSegmentData;
+import com.tomtom.itcu.repository.CurrentSignalStatusRepository;
 import com.tomtom.itcu.repository.TemporaryTrafficRepository;
+import com.tomtom.itcu.repository.TrafficHistoryRepository;
 import com.tomtom.itcu.repository.TrafficInfoRepository;
 import com.tomtom.itcu.service.response.ResponseConstructor;
 import com.tomtom.itcu.service.response.TrafficResponse;
@@ -27,6 +32,11 @@ public class TrafficControllerService {
     public TrafficInfoRepository trafficInfoRepository;
     @Autowired
     public ResponseConstructor responseConstructor;
+    @Autowired
+    public CurrentSignalStatusRepository currentSignalStatusRepository;
+
+    @Autowired
+    public TrafficHistoryRepository trafficHistoryRepository;
 
     @Autowired
     @Qualifier("tomtomServiceImpl")
@@ -43,9 +53,28 @@ public class TrafficControllerService {
 
         final FlowSegmentData flowSegmentData = getFlowSegmentData(lat, lon);
         calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData) + temporaryOverrideTime;
-        updateTrafficHistory(masterTrafficInfo, calculatedSignalTime);
+        updateTrafficHistory(masterTrafficInfo, calculatedSignalTime, TrafficConstatnts.SOURCE_TRAFFIC_SIGNAL_CHANGE);
+        updateCurrentSignalStatus(masterTrafficInfo, calculatedSignalTime);
 
         return responseConstructor.getSignalResponse(signalId, calculatedSignalTime, defaultTime);
+    }
+
+    private void updateCurrentSignalStatus(MasterTrafficInfo masterTrafficInfo, int calculatedSignalTime) {
+
+        final Optional<CurrentSignalStatus> curSignalStatus =
+            currentSignalStatusRepository.findById(masterTrafficInfo.getSignalId());
+        CurrentSignalStatus currentSignalStatus = null;
+        if (curSignalStatus.isPresent()) {
+            currentSignalStatus = curSignalStatus.get();
+
+        } else {
+            currentSignalStatus = new CurrentSignalStatus();
+        }
+        currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
+        currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
+        currentSignalStatus.setUpdationTime(new Date());
+        currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+        currentSignalStatusRepository.save(currentSignalStatus);
     }
 
     private int isTemporaryOverride(final String signalId) {
@@ -67,8 +96,18 @@ public class TrafficControllerService {
         return tempTime;
     }
 
-    private void updateTrafficHistory(final MasterTrafficInfo masterTrafficInfo, final int calculatedSignalTime) {
-        // todo update history table
+    private void updateTrafficHistory(final MasterTrafficInfo masterTrafficInfo, final int calculatedSignalTime,
+        String source) {
+        final TrafficHistory trafficHistory = new TrafficHistory();
+        trafficHistory.setCurrentSignalTime(calculatedSignalTime);
+        trafficHistory.setSignalId(masterTrafficInfo.getSignalId());
+        trafficHistory.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+        trafficHistory.setUpdatationTime(new Date());
+        trafficHistory.setSource(source);
+        trafficHistory.setLat(masterTrafficInfo.getLat());
+        trafficHistory.setLon(masterTrafficInfo.getLon());
+        trafficHistoryRepository.save(trafficHistory);
+
     }
 
     private int getCalculatedSignalTime(final String idDefaultTime, final FlowSegmentData flowSegmentData) {
@@ -98,34 +137,39 @@ public class TrafficControllerService {
     }
 
     public TrafficResponse getSignalInfo(final String signalId) {
-        final List<MasterTrafficInfo> trafficInfo = trafficInfoRepository.findBySignalId(signalId);
-        // responseConstructor.constructResponse(trafficInfo);
-        final TrafficResponse trafficResponse = new TrafficResponse();
-        trafficResponse.setSignalId("u123");
-        trafficResponse.setDefaultTime(30);
-        trafficResponse.setCurrentTime(60);
-        trafficResponse.setLat(40.757285);
-        trafficResponse.setLon(-73.989927);
-        return trafficResponse;
+        final Optional<CurrentSignalStatus> trafficInfo = currentSignalStatusRepository.findById(signalId);
+        final List<MasterTrafficInfo> masterInfo = trafficInfoRepository.findBySignalId(signalId);
+        if (trafficInfo.isPresent()) {
+            return responseConstructor.constructResponse(trafficInfo.get(), masterInfo.get(0));
+        } else {
+            return new TrafficResponse();
+        }
+
     }
 
     public void setTemporaryTime(final String signalId, final int changedSignalTime, final int durationInMinute) {
 
+        updateTemporaryTrafficTime(signalId, changedSignalTime, durationInMinute);
+        final MasterTrafficInfo masterInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
+        updateCurrentSignalStatus(masterInfo, changedSignalTime);
+        updateTrafficHistory(masterInfo, changedSignalTime, TrafficConstatnts.SOURCE_TRAFFIC_TEMPOERARY_CHANGE);
+
+    }
+
+    private void updateTemporaryTrafficTime(String signalId, int changedSignalTime, int durationInMinute) {
         final Optional<TemporarryTrafficDetails> tempTrafficDetails = tempTrafficRepository.findById(signalId);
+        TemporarryTrafficDetails temporarryTrafficDetails = null;
         if (tempTrafficDetails.isPresent()) {
-            final TemporarryTrafficDetails temporarryTrafficDetails = tempTrafficDetails.get();
-            temporarryTrafficDetails.setDuration(durationInMinute);
-            temporarryTrafficDetails.setSignalId(signalId);
-            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
-            temporarryTrafficDetails.setCreationTime(new Date());
+            temporarryTrafficDetails = tempTrafficDetails.get();
+
         } else {
-            final TemporarryTrafficDetails temporarryTrafficDetails = new TemporarryTrafficDetails();
-            temporarryTrafficDetails.setDuration(durationInMinute);
-            temporarryTrafficDetails.setSignalId(signalId);
-            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
-            temporarryTrafficDetails.setCreationTime(new Date());
-            tempTrafficRepository.save(temporarryTrafficDetails);
+            temporarryTrafficDetails = new TemporarryTrafficDetails();
         }
+        temporarryTrafficDetails.setDuration(durationInMinute);
+        temporarryTrafficDetails.setSignalId(signalId);
+        temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
+        temporarryTrafficDetails.setCreationTime(new Date());
+        tempTrafficRepository.save(temporarryTrafficDetails);
 
     }
 
