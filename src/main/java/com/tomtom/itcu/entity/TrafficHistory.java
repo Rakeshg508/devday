@@ -3,6 +3,8 @@ package com.tomtom.itcu.entity;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -11,12 +13,22 @@ import javax.persistence.TemporalType;
 public class TrafficHistory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String signalId;
     private Integer defaultTime;
     private Integer currentSignalTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatationTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSignalId() {
         return signalId;
