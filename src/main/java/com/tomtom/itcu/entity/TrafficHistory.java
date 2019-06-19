@@ -18,6 +18,9 @@ public class TrafficHistory {
     private String signalId;
     private Integer defaultTime;
     private Integer currentSignalTime;
+    private String source;
+    private Double lat;
+    private Double lon;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatationTime;
@@ -60,6 +63,30 @@ public class TrafficHistory {
 
     public void setUpdatationTime(Date updatationTime) {
         this.updatationTime = updatationTime;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon;
     }
 
 }

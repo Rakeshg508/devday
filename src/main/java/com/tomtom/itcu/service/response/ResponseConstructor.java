@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.tomtom.itcu.entity.CurrentSignalStatus;
+import com.tomtom.itcu.entity.MasterTrafficInfo;
 
 @Component
 public class ResponseConstructor {
@@ -20,11 +21,13 @@ public class ResponseConstructor {
         return reponses;
     }
 
-    public TrafficResponse constructResponse(CurrentSignalStatus currentSignalStatus) {
+    public TrafficResponse constructResponse(CurrentSignalStatus currentSignalStatus, MasterTrafficInfo masterTrafficInfo) {
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId(currentSignalStatus.getSignalId());
         trafficResponse.setCurrentTime(currentSignalStatus.getCurrentSignalTime());
         trafficResponse.setDefaultTime(currentSignalStatus.getDefaultTime());
+        trafficResponse.setLat(masterTrafficInfo.getLat());
+        trafficResponse.setLon(masterTrafficInfo.getLon());
         return trafficResponse;
 
     }
