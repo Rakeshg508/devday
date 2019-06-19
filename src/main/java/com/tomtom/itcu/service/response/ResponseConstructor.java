@@ -32,7 +32,10 @@ public class ResponseConstructor {
 
     }
 
-    public List<TrafficResponse> constructResponse(Iterable<MasterTrafficInfo> allSignals) {
+    public List<TrafficResponse> constructResponse(Iterable<MasterTrafficInfo> allSignals,
+        Iterable<CurrentSignalStatus> currentSignalStatus) {
+        final List<CurrentSignalStatus> statusList = new ArrayList();
+        currentSignalStatus.forEach(status -> statusList.add(status));
         final List<TrafficResponse> respose = new ArrayList();
         for (final MasterTrafficInfo trafficInfo : allSignals) {
             final TrafficResponse tr = new TrafficResponse();
@@ -40,10 +43,21 @@ public class ResponseConstructor {
             tr.setLat(trafficInfo.getLat());
             tr.setLon(trafficInfo.getLon());
             tr.setSignalId(trafficInfo.getSignalId());
+            final Integer signalCurrentTime = getSignalCurrentInfo(trafficInfo.getSignalId(), statusList);
+            tr.setCurrentTime(signalCurrentTime);
             respose.add(tr);
         }
         return respose;
 
+    }
+
+    private Integer getSignalCurrentInfo(String signalId, List<CurrentSignalStatus> statusList) {
+        for (final CurrentSignalStatus status : statusList) {
+            if (status.getSignalId().equalsIgnoreCase(signalId)) {
+                return status.getCurrentSignalTime();
+            }
+        }
+        return 0;
     }
 
 }
