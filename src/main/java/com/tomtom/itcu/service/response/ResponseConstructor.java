@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.tomtom.itcu.entity.CurrentSignalStatus;
 import com.tomtom.itcu.entity.MasterTrafficInfo;
 
 @Component
@@ -29,6 +30,15 @@ public class ResponseConstructor {
         trafficResponse.setSignalId(signalInfo.get(0).getSignalId());
 
         reponses.add(trafficResponse);
+
+    }
+
+    public TrafficResponse constructResponse(CurrentSignalStatus currentSignalStatus) {
+        final TrafficResponse trafficResponse = new TrafficResponse();
+        trafficResponse.setSignalId(currentSignalStatus.getSignalId());
+        trafficResponse.setCurrentTime(currentSignalStatus.getCurrentSignalTime());
+        trafficResponse.setDefaultTime(currentSignalStatus.getDefaultTime());
+        return trafficResponse;
 
     }
 

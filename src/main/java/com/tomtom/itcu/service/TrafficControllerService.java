@@ -9,10 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.tomtom.itcu.entity.CurrentSignalStatus;
 import com.tomtom.itcu.entity.MasterTrafficInfo;
 import com.tomtom.itcu.entity.TemporarryTrafficDetails;
+import com.tomtom.itcu.entity.TrafficHistory;
 import com.tomtom.itcu.model.FlowSegmentData;
+import com.tomtom.itcu.repository.CurrentSignalStatusRepository;
 import com.tomtom.itcu.repository.TemporaryTrafficRepository;
+import com.tomtom.itcu.repository.TrafficHistoryRepository;
 import com.tomtom.itcu.repository.TrafficInfoRepository;
 import com.tomtom.itcu.service.response.ResponseConstructor;
 import com.tomtom.itcu.service.response.TrafficResponse;
@@ -27,6 +31,11 @@ public class TrafficControllerService {
     public TrafficInfoRepository trafficInfoRepository;
     @Autowired
     public ResponseConstructor responseConstructor;
+    @Autowired
+    public CurrentSignalStatusRepository currentSignalStatusRepository;
+
+    @Autowired
+    public TrafficHistoryRepository trafficHistoryRepository;
 
     @Autowired
     @Qualifier("tomtomServiceImpl")
@@ -44,8 +53,30 @@ public class TrafficControllerService {
         final FlowSegmentData flowSegmentData = getFlowSegmentData(lat, lon);
         calculatedSignalTime = getCalculatedSignalTime(defaultTime, flowSegmentData) + temporaryOverrideTime;
         updateTrafficHistory(masterTrafficInfo, calculatedSignalTime);
+        updateCurrentSignalStatus(masterTrafficInfo, calculatedSignalTime);
 
         return responseConstructor.getSignalResponse(signalId, calculatedSignalTime, defaultTime);
+    }
+
+    private void updateCurrentSignalStatus(MasterTrafficInfo masterTrafficInfo, int calculatedSignalTime) {
+
+        final Optional<CurrentSignalStatus> curSignalStatus =
+            currentSignalStatusRepository.findById(masterTrafficInfo.getSignalId());
+        if (curSignalStatus.isPresent()) {
+            final CurrentSignalStatus currentSignalStatus = curSignalStatus.get();
+            currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
+            currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
+            currentSignalStatus.setUpdationTime(new Date());
+            currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+            currentSignalStatusRepository.save(currentSignalStatus);
+        } else {
+            final CurrentSignalStatus currentSignalStatus = new CurrentSignalStatus();
+            currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
+            currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
+            currentSignalStatus.setUpdationTime(new Date());
+            currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+            currentSignalStatusRepository.save(currentSignalStatus);
+        }
     }
 
     private int isTemporaryOverride(final String signalId) {
@@ -68,7 +99,13 @@ public class TrafficControllerService {
     }
 
     private void updateTrafficHistory(final MasterTrafficInfo masterTrafficInfo, final int calculatedSignalTime) {
-        // todo update history table
+        final TrafficHistory trafficHistory = new TrafficHistory();
+        trafficHistory.setCurrentSignalTime(calculatedSignalTime);
+        trafficHistory.setSignalId(masterTrafficInfo.getSignalId());
+        trafficHistory.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+        trafficHistory.setUpdatationTime(new Date());
+        trafficHistoryRepository.save(trafficHistory);
+
     }
 
     private int getCalculatedSignalTime(final String idDefaultTime, final FlowSegmentData flowSegmentData) {
@@ -98,15 +135,13 @@ public class TrafficControllerService {
     }
 
     public TrafficResponse getSignalInfo(final String signalId) {
-        final List<MasterTrafficInfo> trafficInfo = trafficInfoRepository.findBySignalId(signalId);
-        // responseConstructor.constructResponse(trafficInfo);
-        final TrafficResponse trafficResponse = new TrafficResponse();
-        trafficResponse.setSignalId("u123");
-        trafficResponse.setDefaultTime(30);
-        trafficResponse.setCurrentTime(60);
-        trafficResponse.setLat(40.757285);
-        trafficResponse.setLon(-73.989927);
-        return trafficResponse;
+        final Optional<CurrentSignalStatus> trafficInfo = currentSignalStatusRepository.findById(signalId);
+        if (trafficInfo.isPresent()) {
+            return responseConstructor.constructResponse(trafficInfo.get());
+        } else {
+            return new TrafficResponse();
+        }
+
     }
 
     public void setTemporaryTime(final String signalId, final int changedSignalTime, final int durationInMinute) {

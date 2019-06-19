@@ -33,14 +33,6 @@ public class TrafficController {
     public void setTemporaryTrafficTime(String signalId, int changedSignalTime, int durationInMinute) {
         // input: changed value, duration, signal id
         trafficControllerService.setTemporaryTime(signalId, changedSignalTime, durationInMinute);
-        System.out.println("traffic temporary  called");
-    }
-
-    @RequestMapping(value = "/change/default", method = RequestMethod.POST)
-    @JsonProperty
-    public String setDefaultTrafficTime() {
-        System.out.println("set first time unit value");
-        return "traffic";
     }
 
 }

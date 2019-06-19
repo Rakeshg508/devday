@@ -6,4 +6,6 @@ import com.tomtom.itcu.entity.TrafficHistory;
 
 public interface TrafficHistoryRepository extends CrudRepository<TrafficHistory, String> {
 
+    @Override
+    TrafficHistory save(TrafficHistory entity);
 }
