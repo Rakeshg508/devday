@@ -62,21 +62,18 @@ public class TrafficControllerService {
 
         final Optional<CurrentSignalStatus> curSignalStatus =
             currentSignalStatusRepository.findById(masterTrafficInfo.getSignalId());
+        CurrentSignalStatus currentSignalStatus = null;
         if (curSignalStatus.isPresent()) {
-            final CurrentSignalStatus currentSignalStatus = curSignalStatus.get();
-            currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
-            currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
-            currentSignalStatus.setUpdationTime(new Date());
-            currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
-            currentSignalStatusRepository.save(currentSignalStatus);
+            currentSignalStatus = curSignalStatus.get();
+
         } else {
-            final CurrentSignalStatus currentSignalStatus = new CurrentSignalStatus();
-            currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
-            currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
-            currentSignalStatus.setUpdationTime(new Date());
-            currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
-            currentSignalStatusRepository.save(currentSignalStatus);
+            currentSignalStatus = new CurrentSignalStatus();
         }
+        currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
+        currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
+        currentSignalStatus.setUpdationTime(new Date());
+        currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+        currentSignalStatusRepository.save(currentSignalStatus);
     }
 
     private int isTemporaryOverride(final String signalId) {
@@ -147,21 +144,34 @@ public class TrafficControllerService {
     public void setTemporaryTime(final String signalId, final int changedSignalTime, final int durationInMinute) {
 
         final Optional<TemporarryTrafficDetails> tempTrafficDetails = tempTrafficRepository.findById(signalId);
+        TemporarryTrafficDetails temporarryTrafficDetails = null;
         if (tempTrafficDetails.isPresent()) {
-            final TemporarryTrafficDetails temporarryTrafficDetails = tempTrafficDetails.get();
-            temporarryTrafficDetails.setDuration(durationInMinute);
-            temporarryTrafficDetails.setSignalId(signalId);
-            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
-            temporarryTrafficDetails.setCreationTime(new Date());
-            tempTrafficRepository.save(temporarryTrafficDetails);
+            temporarryTrafficDetails = tempTrafficDetails.get();
+
         } else {
-            final TemporarryTrafficDetails temporarryTrafficDetails = new TemporarryTrafficDetails();
-            temporarryTrafficDetails.setDuration(durationInMinute);
-            temporarryTrafficDetails.setSignalId(signalId);
-            temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
-            temporarryTrafficDetails.setCreationTime(new Date());
-            tempTrafficRepository.save(temporarryTrafficDetails);
+            temporarryTrafficDetails = new TemporarryTrafficDetails();
         }
+        temporarryTrafficDetails.setDuration(durationInMinute);
+        temporarryTrafficDetails.setSignalId(signalId);
+        temporarryTrafficDetails.setTemporaryTime(changedSignalTime);
+        temporarryTrafficDetails.setCreationTime(new Date());
+        tempTrafficRepository.save(temporarryTrafficDetails);
+
+        final MasterTrafficInfo masterInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
+
+        final Optional<CurrentSignalStatus> curSignalStatus = currentSignalStatusRepository.findById(signalId);
+        CurrentSignalStatus currentSignalStatus = null;
+        if (curSignalStatus.isPresent()) {
+            currentSignalStatus = curSignalStatus.get();
+
+        } else {
+            currentSignalStatus = new CurrentSignalStatus();
+        }
+        currentSignalStatus.setSignalId(signalId);
+        currentSignalStatus.setCurrentSignalTime(temporarryTrafficDetails.getTemporaryTime());
+        currentSignalStatus.setUpdationTime(new Date());
+        currentSignalStatus.setDefaultTime(Integer.parseInt(masterInfo.getDefaultTime()));
+        currentSignalStatusRepository.save(currentSignalStatus);
 
     }
 
