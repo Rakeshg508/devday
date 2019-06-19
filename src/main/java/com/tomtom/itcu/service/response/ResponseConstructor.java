@@ -32,4 +32,18 @@ public class ResponseConstructor {
 
     }
 
+    public List<TrafficResponse> constructResponse(Iterable<MasterTrafficInfo> allSignals) {
+        final List<TrafficResponse> respose = new ArrayList();
+        for (final MasterTrafficInfo trafficInfo : allSignals) {
+            final TrafficResponse tr = new TrafficResponse();
+            tr.setDefaultTime(Integer.parseInt(trafficInfo.getDefaultTime()));
+            tr.setLat(trafficInfo.getLat());
+            tr.setLon(trafficInfo.getLon());
+            tr.setSignalId(trafficInfo.getSignalId());
+            respose.add(tr);
+        }
+        return respose;
+
+    }
+
 }

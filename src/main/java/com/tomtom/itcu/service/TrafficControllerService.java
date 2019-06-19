@@ -173,4 +173,9 @@ public class TrafficControllerService {
 
     }
 
+    public List<TrafficResponse> getAllSignals() {
+        final Iterable<MasterTrafficInfo> allSignals = trafficInfoRepository.findAll();
+        return responseConstructor.constructResponse(allSignals);
+    }
+
 }
