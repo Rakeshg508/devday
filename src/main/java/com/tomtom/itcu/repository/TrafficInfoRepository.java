@@ -9,5 +9,4 @@ import com.tomtom.itcu.entity.MasterTrafficInfo;
 public interface TrafficInfoRepository extends CrudRepository<MasterTrafficInfo, String> {
 
     List<MasterTrafficInfo> findBySignalId(String signalId);
-
 }

@@ -7,16 +7,17 @@ import org.springframework.stereotype.Component;
 
 import com.tomtom.itcu.entity.CurrentSignalStatus;
 import com.tomtom.itcu.entity.MasterTrafficInfo;
+import com.tomtom.itcu.model.MasterTrafficInfoCurrentSignalStatusDTO;
 
 @Component
 public class ResponseConstructor {
 
-    public List<TrafficResponse> getSignalResponse(String signalId, int calculatedSignalTime, String defaultTime) {
+    public List<TrafficResponse> getSignalResponse(String signalId, int calculatedSignalTime, int defaultTime) {
         final List<TrafficResponse> reponses = new ArrayList<TrafficResponse>();
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId(signalId);
         trafficResponse.setCurrentTime(calculatedSignalTime);
-        trafficResponse.setDefaultTime(Integer.parseInt(defaultTime));
+        trafficResponse.setDefaultTime(defaultTime);
         reponses.add(trafficResponse);
         return reponses;
     }
@@ -25,7 +26,7 @@ public class ResponseConstructor {
         final TrafficResponse trafficResponse = new TrafficResponse();
         trafficResponse.setSignalId(currentSignalStatus.getSignalId());
         trafficResponse.setCurrentTime(currentSignalStatus.getCurrentSignalTime());
-        trafficResponse.setDefaultTime(currentSignalStatus.getDefaultTime());
+        // trafficResponse.setDefaultTime(currentSignalStatus.getDefaultTime());
         trafficResponse.setLat(masterTrafficInfo.getLat());
         trafficResponse.setLon(masterTrafficInfo.getLon());
         return trafficResponse;
@@ -39,7 +40,7 @@ public class ResponseConstructor {
         final List<TrafficResponse> respose = new ArrayList();
         for (final MasterTrafficInfo trafficInfo : allSignals) {
             final TrafficResponse tr = new TrafficResponse();
-            tr.setDefaultTime(Integer.parseInt(trafficInfo.getDefaultTime()));
+            tr.setDefaultTime(trafficInfo.getDefaultTime());
             tr.setLat(trafficInfo.getLat());
             tr.setLon(trafficInfo.getLon());
             tr.setSignalId(trafficInfo.getSignalId());
@@ -58,6 +59,20 @@ public class ResponseConstructor {
             }
         }
         return 0;
+    }
+
+    public List<TrafficResponse> constructResponse(List<MasterTrafficInfoCurrentSignalStatusDTO> ctsdto) {
+        final List<TrafficResponse> respose = new ArrayList();
+        ctsdto.forEach(dto -> {
+            final TrafficResponse tr = new TrafficResponse();
+            tr.setDefaultTime(dto.getDefaultTime());
+            tr.setLat(dto.getLat());
+            tr.setLon(dto.getLon());
+            tr.setSignalId(dto.getSignalId());
+            tr.setCurrentTime(dto.getCurrentTime());
+            respose.add(tr);
+        });
+        return respose;
     }
 
 }

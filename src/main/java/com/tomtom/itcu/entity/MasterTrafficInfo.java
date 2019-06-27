@@ -1,25 +1,23 @@
 package com.tomtom.itcu.entity;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class MasterTrafficInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String signalId;
-    private String defaultTime;
+    private Integer defaultTime;
     private Double lat;
     private Double lon;
 
-    public MasterTrafficInfo() {
-    }
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "masterTrafficInfo")
+    private CurrentSignalStatus curSignalStatus;
 
-    public MasterTrafficInfo(String defaultTime) {
-        this.defaultTime = defaultTime;
+    public MasterTrafficInfo() {
     }
 
     public String getSignalId() {
@@ -30,11 +28,11 @@ public class MasterTrafficInfo {
         this.signalId = signalId;
     }
 
-    public String getDefaultTime() {
+    public Integer getDefaultTime() {
         return defaultTime;
     }
 
-    public void setDefaultTime(String defaultTime) {
+    public void setDefaultTime(Integer defaultTime) {
         this.defaultTime = defaultTime;
     }
 
@@ -48,6 +46,14 @@ public class MasterTrafficInfo {
 
     public Double getLon() {
         return lon;
+    }
+
+    public CurrentSignalStatus getCurSignalStatus() {
+        return curSignalStatus;
+    }
+
+    public void setCurSignalStatus(CurrentSignalStatus curSignalStatus) {
+        this.curSignalStatus = curSignalStatus;
     }
 
     public void setLon(Double lon) {

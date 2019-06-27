@@ -2,8 +2,14 @@ package com.tomtom.itcu.entity;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -11,11 +17,25 @@ import javax.persistence.TemporalType;
 public class CurrentSignalStatus {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Column(unique = true)
     private String signalId;
     private Integer currentSignalTime;
-    private Integer defaultTime;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updationTime;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "signalId", insertable = false, updatable = false)
+    private MasterTrafficInfo masterTrafficInfo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSignalId() {
         return signalId;
@@ -41,12 +61,12 @@ public class CurrentSignalStatus {
         this.updationTime = updationTime;
     }
 
-    public Integer getDefaultTime() {
-        return defaultTime;
+    public MasterTrafficInfo getMasterTrafficInfo() {
+        return masterTrafficInfo;
     }
 
-    public void setDefaultTime(Integer defaultTime) {
-        this.defaultTime = defaultTime;
+    public void setMasterTrafficInfo(MasterTrafficInfo masterTrafficInfo) {
+        this.masterTrafficInfo = masterTrafficInfo;
     }
 
 }

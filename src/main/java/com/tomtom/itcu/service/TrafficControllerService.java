@@ -15,6 +15,7 @@ import com.tomtom.itcu.entity.MasterTrafficInfo;
 import com.tomtom.itcu.entity.TemporarryTrafficDetails;
 import com.tomtom.itcu.entity.TrafficHistory;
 import com.tomtom.itcu.model.FlowSegmentData;
+import com.tomtom.itcu.model.MasterTrafficInfoCurrentSignalStatusDTO;
 import com.tomtom.itcu.repository.CurrentSignalStatusRepository;
 import com.tomtom.itcu.repository.TemporaryTrafficRepository;
 import com.tomtom.itcu.repository.TrafficHistoryRepository;
@@ -44,7 +45,7 @@ public class TrafficControllerService {
 
     public List<TrafficResponse> getDefaultTrafficInfo(final String signalId) {
         final MasterTrafficInfo masterTrafficInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
-        final String defaultTime = masterTrafficInfo.getDefaultTime();
+        final int defaultTime = masterTrafficInfo.getDefaultTime();
         final Double lat = masterTrafficInfo.getLat();
         final Double lon = masterTrafficInfo.getLon();
         int calculatedSignalTime = 0;
@@ -62,7 +63,8 @@ public class TrafficControllerService {
     private void updateCurrentSignalStatus(MasterTrafficInfo masterTrafficInfo, int calculatedSignalTime) {
 
         final Optional<CurrentSignalStatus> curSignalStatus =
-            currentSignalStatusRepository.findById(masterTrafficInfo.getSignalId());
+            currentSignalStatusRepository.findBySignalId(masterTrafficInfo.getSignalId());
+
         CurrentSignalStatus currentSignalStatus = null;
         if (curSignalStatus.isPresent()) {
             currentSignalStatus = curSignalStatus.get();
@@ -73,7 +75,6 @@ public class TrafficControllerService {
         currentSignalStatus.setSignalId(masterTrafficInfo.getSignalId());
         currentSignalStatus.setCurrentSignalTime(calculatedSignalTime);
         currentSignalStatus.setUpdationTime(new Date());
-        currentSignalStatus.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
         currentSignalStatusRepository.save(currentSignalStatus);
     }
 
@@ -101,7 +102,7 @@ public class TrafficControllerService {
         final TrafficHistory trafficHistory = new TrafficHistory();
         trafficHistory.setCurrentSignalTime(calculatedSignalTime);
         trafficHistory.setSignalId(masterTrafficInfo.getSignalId());
-        trafficHistory.setDefaultTime(Integer.parseInt(masterTrafficInfo.getDefaultTime()));
+        trafficHistory.setDefaultTime(masterTrafficInfo.getDefaultTime());
         trafficHistory.setUpdatationTime(new Date());
         trafficHistory.setSource(source);
         trafficHistory.setLat(masterTrafficInfo.getLat());
@@ -110,10 +111,9 @@ public class TrafficControllerService {
 
     }
 
-    private int getCalculatedSignalTime(final String idDefaultTime, final FlowSegmentData flowSegmentData) {
+    private int getCalculatedSignalTime(final int defaultTime, final FlowSegmentData flowSegmentData) {
         final int currentSpeed = flowSegmentData.getCurrentSpeed();
         final int freeFlowSpeed = flowSegmentData.getFreeFlowSpeed();
-        final int defaultTime = Integer.parseInt(idDefaultTime);
         int deviateTime = 0;
         if (currentSpeed == freeFlowSpeed) {
             deviateTime = defaultTime;
@@ -137,13 +137,9 @@ public class TrafficControllerService {
     }
 
     public TrafficResponse getSignalInfo(final String signalId) {
-        final Optional<CurrentSignalStatus> trafficInfo = currentSignalStatusRepository.findById(signalId);
-        final List<MasterTrafficInfo> masterInfo = trafficInfoRepository.findBySignalId(signalId);
-        if (trafficInfo.isPresent()) {
-            return responseConstructor.constructResponse(trafficInfo.get(), masterInfo.get(0));
-        } else {
-            return new TrafficResponse();
-        }
+        final List<MasterTrafficInfoCurrentSignalStatusDTO> ctsi =
+            currentSignalStatusRepository.fetchCurrentTrafficSignalInfo();
+        return responseConstructor.constructResponse(ctsi).get(0);
 
     }
 
@@ -174,9 +170,9 @@ public class TrafficControllerService {
     }
 
     public List<TrafficResponse> getAllSignals() {
-        final Iterable<MasterTrafficInfo> allSignals = trafficInfoRepository.findAll();
-        final Iterable<CurrentSignalStatus> allSignalCurrentTime = currentSignalStatusRepository.findAll();
-        return responseConstructor.constructResponse(allSignals, allSignalCurrentTime);
+        final List<MasterTrafficInfoCurrentSignalStatusDTO> ctsi =
+            currentSignalStatusRepository.fetchCurrentTrafficSignalInfo();
+        return responseConstructor.constructResponse(ctsi);
     }
 
 }
