@@ -7,7 +7,7 @@ const char* signalId_2 = "u102";
 const char* signalId_3 = "u103";
 const char* signalId_4 = "u104";
 
-const char* host = "10.198.83.92";
+const char* host = "10.198.83.155";
 const char* port = "8080";
 
 int defaultTime_1 = 60;
@@ -26,33 +26,15 @@ int singnalNumber = 0;
 int defaultDuration = 30;
 int calculatedDuration = 0;
 
-int signal1Red = 0;
-int signal1Green = 2;
-int signal2Red = 4;
-int signal2Green = 5;
-int signal3Red = 12;
-int signal3Green = 13;
-int signal4Red = 14;
-int signal4Green = 15;
+int output1 = 4;
+int output2 = 5;
 
 void setup() {
   // make pins as output controlling the light
-  pinMode(signal1Red, OUTPUT);
-  digitalWrite(signal1Red, LOW);
-  pinMode(signal1Green, OUTPUT);
-  digitalWrite(signal1Green, LOW);
-  pinMode(signal2Red, OUTPUT);
-  digitalWrite(signal2Red, LOW);
-  pinMode(signal2Green, OUTPUT);
-  digitalWrite(signal2Green, LOW);
-  pinMode(signal3Red, OUTPUT);
-  digitalWrite(signal3Red, LOW);
-  pinMode(signal3Green, OUTPUT);
-  digitalWrite(signal3Green, LOW);
-  pinMode(signal4Red, OUTPUT);
-  digitalWrite(signal4Red, LOW);
-  pinMode(signal4Green, OUTPUT);
-  digitalWrite(signal4Green, LOW);
+  pinMode(output1, OUTPUT);
+  digitalWrite(output1, LOW);
+  pinMode(output2, OUTPUT);
+  digitalWrite(output2, LOW);
 
   // prepare serial
   Serial.begin(115200);
@@ -122,17 +104,23 @@ void sendCommandToTurnOnLight(int count)
   switch (count)
   {
     case 0:
-      manupulateSignals(0,1);
+      digitalWrite(output1, 0);
+      digitalWrite(output2, 1);
+      //manupulateSignals(0,1);
       break;
     case 1:
-      manupulateSignals(1,0);
+      digitalWrite(output1, 1);
+      digitalWrite(output2, 0);
+      //manupulateSignals(1,0);
       break;
     case 2:
-      manupulateSignals(1,1);
+      digitalWrite(output1, 1);
+      digitalWrite(output2, 1);
+      //manupulateSignals(1,1);
       break;
   }
 }
-void manupulateSignals(int input1, int input2) {
+/*void manupulateSignals(int input1, int input2) {
   if (input1 == LOW && input2 == HIGH) {
     digitalWrite(signal1Red, LOW);
     digitalWrite(signal1Green, HIGH); // ON
@@ -163,7 +151,7 @@ void manupulateSignals(int input1, int input2) {
     digitalWrite(signal3Green, 1); // ON
   }
 }
-
+*/
 String getUrl(String unitId) {
   String urlComplete = url + host + ":" + port + "/itcu/traffic/info?" + "signalId=" + unitId;
   Serial.println(urlComplete);
