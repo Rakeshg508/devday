@@ -18,7 +18,7 @@ public interface CurrentSignalStatusRepository extends CrudRepository<CurrentSig
     CurrentSignalStatus save(CurrentSignalStatus entity);
 
     @Query("select new com.tomtom.itcu.model.MasterTrafficInfoCurrentSignalStatusDTO(mti.signalId,mti.defaultTime, "
-        + "mti.lat,mti.lon,css.currentSignalTime) from MasterTrafficInfo mti inner join CurrentSignalStatus css on mti.signalId =  css.signalId")
+        + "mti.lat,mti.lon,css.currentSignalTime) from MasterTrafficInfo mti left join CurrentSignalStatus css on mti.signalId =  css.signalId")
     List<MasterTrafficInfoCurrentSignalStatusDTO> fetchCurrentTrafficSignalInfo();
 
     @Query("select css from CurrentSignalStatus css where css.signalId=?1")
