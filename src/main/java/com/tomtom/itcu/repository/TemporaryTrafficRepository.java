@@ -19,7 +19,7 @@ public interface TemporaryTrafficRepository extends CrudRepository<TemporarryTra
     @Query("select ttd from com.tomtom.itcu.entity.TemporarryTrafficDetails ttd where ttd.signalId=?1")
     Optional<TemporarryTrafficDetails> findBySignalId(String signalId);
 
-    @Query("select ttd from com.tomtom.itcu.entity.TemporarryTrafficDetails ttd where ttd.signalId=?2 and (?1 between ttd.start_date_time and ttd.end_date_time)")
+    @Query("select ttd from com.tomtom.itcu.entity.TemporarryTrafficDetails ttd where ttd.signalId=?2 and (?1 between ttd.startDateTime and ttd.endDateTime)")
     Optional<TemporarryTrafficDetails> findTempTrafficDetailInCurrentTime(Date currentTime, String signalId);
 
 }
