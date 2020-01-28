@@ -199,6 +199,8 @@ public class TrafficControllerService {
         final MasterTrafficInfo masterInfo = trafficInfoRepository.findBySignalId(signalId).get(0);
         updateCurrentSignalStatus(masterInfo, temporaryTime);
         updateTrafficHistory(masterInfo, temporaryTime, comments);
+        // roadIncident table
+        // signalId,deftime ,current,lat,lon, TimeFrame
 
     }
 
